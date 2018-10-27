@@ -140,18 +140,25 @@ my-app/
     index.html
     favicon.ico
   src/
-    App.css
-    App.js
-    App.test.js
-    index.css
-    index.js
-    logo.svg
+    client/
+			assets/
+				logo.svg
+			styles/
+				App.css
+				index.css
+			App.js
+			index.js
+		server/
+		serviceWorker.js
+	test/
+		client/
+			App.test.js
 ```
 
 For the project to build, **these files must exist with exact filenames**:
 
 - `public/index.html` is the page template;
-- `src/index.js` is the JavaScript entry point.
+- `src/client/index.js` is the JavaScript entry point.
 
 You can delete or rename the other files.
 
