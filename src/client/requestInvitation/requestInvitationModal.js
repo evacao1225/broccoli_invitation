@@ -19,6 +19,7 @@ class RequestInvitationModal extends Component {
 
 		this.state = {
 			show: false,
+			done: false,
 			name: '',
 			email: '',
 			emailConfirmed: '',
@@ -40,6 +41,7 @@ class RequestInvitationModal extends Component {
 	handleClose() {
 		this.setState({
 			show: false,
+			done: false,
 			name: '',
 			email: '',
 			emailConfirmed: '',
@@ -57,14 +59,20 @@ class RequestInvitationModal extends Component {
 				name: this.state.name,
 				email: this.state.email
 			};
-			Client.post('/requestInvitation', body)
+			Client.post('https://l94wc2001h.execute-api.ap-southeast-2.amazonaws.com/prod/fake-auth', body)
 			.then((response) => {
-				_self.setState({
-					buttonMsg: 'Send',
-					disabled: false
-				});
 				if(response.status !== 200 && response.status !== 202) {
-					// display error msg
+					// error occurred
+					_self.helpMsg = response.data;
+					_self.setState({
+						buttonMsg: 'Send',
+						disabled: false
+					});
+				}else{
+					// success and display OK button and notification
+					_self.setState({
+						done: true
+					});
 				}
 			})
 			.catch((error) => {
@@ -156,56 +164,70 @@ class RequestInvitationModal extends Component {
 				<Button bsStyle="success" onClick={this.handleShow}>Send an invite</Button>
 				<Modal show={this.state.show} onHide={this.handleClose}>
 					<Modal.Header closeButton>
-						<Modal.Title>Request an Invitation</Modal.Title>
+						<Modal.Title>{!this.state.done ? "Request an Invitation" : "All done!"}</Modal.Title>
 					</Modal.Header>
 					<Modal.Body>
 						<form>
-							{/***** name input ****/}
-							<FormGroup
-								controlId="nameOfRequestInvite"
-								validationState={this.getNameValidationState()}
-							>
-								<FormControl
-									type="text"
-									value={this.state.name}
-									placeholder="Enter your name"
-									onChange={this.handleNameChange}
-									required
-								/>
-								<FormControl.Feedback />
-							</FormGroup>
-							{/***** email input ****/}
-							<FormGroup
-								controlId="emailOfRequestInvite"
-								validationState={this.getEmailValidationState()}
-							>
-								<FormControl
-									type="email"
-									value={this.state.email}
-									placeholder="Email"
-									onChange={this.handleEmailChange}
-									required
-								/>
-								<FormControl.Feedback />
-							</FormGroup>
-							{/***** confirmed email input ****/}
-							<FormGroup
-								controlId="confirmEmailOfRequestInvite"
-								validationState={this.getConfirmEmailValidationState()}
-							>
-								<FormControl
-									type="email"
-									value={this.state.emailConfirmed}
-									placeholder="Confirm email"
-									onChange={this.handleConfirmEmailChange}
-									required
-								/>
-								<FormControl.Feedback />
-							</FormGroup>
+							{!this.state.done &&
+								<FormGroup
+									controlId="nameOfRequestInvite"
+									validationState={this.getNameValidationState()}
+								>
+									<FormControl
+										type="text"
+										value={this.state.name}
+										placeholder="Enter your name"
+										onChange={this.handleNameChange}
+										required
+									/>
+									<FormControl.Feedback />
+								</FormGroup>
+							}
+							{!this.state.done &&
+								<FormGroup
+									controlId="emailOfRequestInvite"
+									validationState={this.getEmailValidationState()}
+								>
+									<FormControl
+										type="email"
+										value={this.state.email}
+										placeholder="Email"
+										onChange={this.handleEmailChange}
+										required
+									/>
+									<FormControl.Feedback />
+								</FormGroup>
+							}
+							{!this.state.done &&
+								<FormGroup
+									controlId="confirmEmailOfRequestInvite"
+									validationState={this.getConfirmEmailValidationState()}
+								>
+									<FormControl
+										type="email"
+										value={this.state.emailConfirmed}
+										placeholder="Confirm email"
+										onChange={this.handleConfirmEmailChange}
+										required
+									/>
+									<FormControl.Feedback />
+								</FormGroup>
+							}
+							{ this.state.done &&
+								<div>
+									<p>You will be one of the first to experience</p>
+									<p>Broccoli & Co. when we launch.</p>
+								</div>
+							}
 					</form>
 				</Modal.Body>
 				<Modal.Footer>
+				{ !this.state.done &&
 					<Button bsStyle="success" onClick={this.handleClick} disabled={this.state.disabled} block>{this.state.buttonMsg}</Button>
+				}
+				{ this.state.done &&
+					<Button bsStyle="success" onClick={this.handleClose} block>OK</Button>
+				}
 					<HelpBlock bsClass="help-msg">{this.helpMsg}</HelpBlock>
 				</Modal.Footer>
 				</Modal>
