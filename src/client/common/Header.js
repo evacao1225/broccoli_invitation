@@ -1,11 +1,11 @@
 import React, {Component} from 'react';
 import { PageHeader } from 'react-bootstrap';
-import '../styles/footer.css';
+import '../styles/header.css';
 
 class Header extends Component {
 	render() {
 		return (
-			<PageHeader>
+			<PageHeader bsClass="my-page-header">
 				BROCCOLI & CO.
 			</PageHeader>
 		);

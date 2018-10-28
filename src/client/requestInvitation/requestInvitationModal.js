@@ -4,6 +4,7 @@ import '../styles/requestInvitation.css';
 import Client from '../util/client';
 
 const RESULT = {success: "success", warning: "warning", error: "error", null: null};
+const API = 'https://l94wc2001h.execute-api.ap-southeast-2.amazonaws.com/prod/fake-auth';
 class RequestInvitationModal extends Component {
 	constructor(props) {
 		super(props);
@@ -27,10 +28,20 @@ class RequestInvitationModal extends Component {
 			disabled: false
 		};
 
-		this.helpMsg = '';
+		this.validateResult = {
+			name: {valid: false, helpMsg: ''},
+			email: {valid: false, helpMsg: ''},
+			emailConfirmed: {valid: false, helpMsg: ''}
+		};
+
+		// to store api error
+		this.errorMsg = '';
+		/*this.helpMsg4Name = '';
+		this.helpMsg4Email = '';
+		this.helpMsg4EmailConfirmed = '';
 		this.nameValid = false;
 		this.emailValid = false;
-		this.emailConfirmedValid = false;
+		this.emailConfirmedValid = false;*/
 		this.emailValidator = new RegExp(/^[a-zA-Z0-9.!#'$%&*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/);
 	}
 
@@ -52,18 +63,24 @@ class RequestInvitationModal extends Component {
 
 	handleClick() {
 		const _self = this;
-		if(this.nameValid && this.emailValid && this.emailConfirmedValid) {
-			this.helpMsg = '';
+		if(this.validateResult.name.valid &&
+			this.validateResult.email.valid &&
+			this.validateResult.emailConfirmed.valid) {
+			// values of three inputs are all valid, hence no need to show help msg
+			this.validateResult.name.helpMsg = '';
+			this.validateResult.email.helpMsg = '';
+			this.validateResult.emailConfirmed.helpMsg = '';
+
 			// using ajax to access server
 			let body = {
 				name: this.state.name,
 				email: this.state.email
 			};
-			Client.post('https://l94wc2001h.execute-api.ap-southeast-2.amazonaws.com/prod/fake-auth', body)
+			Client.post(API, body)
 			.then((response) => {
 				if(response.status !== 200 && response.status !== 202) {
 					// error occurred
-					_self.helpMsg = response.data;
+					_self.errorMsg = response.data;
 					_self.setState({
 						buttonMsg: 'Send',
 						disabled: false
@@ -76,7 +93,7 @@ class RequestInvitationModal extends Component {
 				}
 			})
 			.catch((error) => {
-				_self.helpMsg = error.message;
+				_self.errorMsg = error.message;
 				_self.setState({
 					buttonMsg: 'Send',
 					disabled: false,
@@ -87,17 +104,16 @@ class RequestInvitationModal extends Component {
 			 	disabled: true
 			});
 		}else{
-			if(!this.nameValid) {
-				this.helpMsg = 'Name must be at least three charactors long.';
-			}else if(!this.emailValid) {
-				this.helpMsg = 'Email format is incorrect.';
-			}else {
-				this.helpMsg = 'Confirmed email must be the same with email.';
+			if(!this.validateResult.name.valid) {
+				this.validateResult.name.helpMsg = 'Name must be at least three charactors long.';
 			}
-			this.setState({
-				buttonMsg: 'Send',
-				disabled: false
-			});
+			if(!this.validateResult.email.valid) {
+				this.validateResult.email.helpMsg = 'Email format is incorrect.';
+			}
+			if(!this.validateResult.emailConfirmed.valid){
+				this.validateResult.emailConfirmed.helpMsg = 'Confirmed email must be the same with email.';
+			}
+			this.forceUpdate();
 		}
 	}
 
@@ -120,11 +136,11 @@ class RequestInvitationModal extends Component {
 		const nameLength = this.state.name.length;
 		let result = (nameLength >= 3) ? RESULT.success :
 			((nameLength <= 0) ? RESULT.null : RESULT.error);
-		this.nameValid = result === RESULT.success;
+		this.validateResult.name.valid = result === RESULT.success;
 		if(result === RESULT.error) {
-			this.helpMsg = 'Name must be at least three charactors long.';
+			this.validateResult.name.helpMsg = 'Name must be at least three charactors long.';
 		}else{
-			this.helpMsg = '';
+			this.validateResult.name.helpMsg = '';
 		}
 		return result;
 	}
@@ -133,11 +149,11 @@ class RequestInvitationModal extends Component {
 		const email = this.state.email;
 		let result = this.emailValidator.test(email) ? RESULT.success :
 			(email === '' ? RESULT.null : RESULT.error);
-		this.emailValid = result === RESULT.success;
+		this.validateResult.email.valid = result === RESULT.success;
 		if(result === RESULT.error) {
-			this.helpMsg = 'Email format is incorrect.';
+			this.validateResult.email.helpMsg = 'Email format is incorrect.';
 		}else{
-			this.helpMsg = '';
+			this.validateResult.email.helpMsg = '';
 		}
 		return result;
 	}
@@ -149,16 +165,17 @@ class RequestInvitationModal extends Component {
 		const email = this.state.email;
 		const emailConfirmed = this.state.emailConfirmed;
 		let result = email === emailConfirmed ? (email === '' ? RESULT.null : RESULT.success) : RESULT.error;
-		this.emailConfirmedValid = result === RESULT.success;
+		this.validateResult.emailConfirmed.valid = result === RESULT.success;
 		if(result === RESULT.error) {
-			this.helpMsg = 'Confirmed email must be the same with email.';
+			this.validateResult.emailConfirmed.helpMsg = 'Confirmed email must be the same with email.';
 		}else{
-			this.helpMsg = '';
+			this.validateResult.emailConfirmed.helpMsg = '';
 		}
 		return result;
 	}
 
 	render() {
+		console.log(`********** rendering: ${this.validateResult.name.helpMsg}`);
 		return (
 			<div id="requestInvite">
 				<Button bsStyle="success" onClick={this.handleShow}>Send an invite</Button>
@@ -181,6 +198,7 @@ class RequestInvitationModal extends Component {
 										required
 									/>
 									<FormControl.Feedback />
+									<HelpBlock bsClass="help-msg">{this.validateResult.name.helpMsg}</HelpBlock>
 								</FormGroup>
 							}
 							{!this.state.done &&
@@ -196,6 +214,7 @@ class RequestInvitationModal extends Component {
 										required
 									/>
 									<FormControl.Feedback />
+									<HelpBlock bsClass="help-msg">{this.validateResult.email.helpMsg}</HelpBlock>
 								</FormGroup>
 							}
 							{!this.state.done &&
@@ -211,6 +230,7 @@ class RequestInvitationModal extends Component {
 										required
 									/>
 									<FormControl.Feedback />
+									<HelpBlock bsClass="help-msg">{this.validateResult.emailConfirmed.helpMsg}</HelpBlock>
 								</FormGroup>
 							}
 							{ this.state.done &&
@@ -228,7 +248,7 @@ class RequestInvitationModal extends Component {
 				{ this.state.done &&
 					<Button bsStyle="success" onClick={this.handleClose} block>OK</Button>
 				}
-					<HelpBlock bsClass="help-msg">{this.helpMsg}</HelpBlock>
+					<HelpBlock bsClass="help-msg">{this.errorMsg}</HelpBlock>
 				</Modal.Footer>
 				</Modal>
 			</div>
