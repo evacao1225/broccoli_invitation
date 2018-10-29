@@ -94,12 +94,14 @@ class RequestInvitationModal extends Component {
 				}
 			})
 			.catch((error) => {
-				_self.errorMsg = error.message;
+				_self.errorMsg = error.response ? error.response.data.errorMessage : error.message;
 				_self.setState({
 					buttonMsg: 'Send',
 					disabled: false,
 				});
 			});
+			//reset error msg
+			this.errorMsg = '';
 			this.setState({
 				buttonMsg: 'Sending, please wait...',
 			 	disabled: true
@@ -181,7 +183,6 @@ class RequestInvitationModal extends Component {
 	}
 
 	render() {
-		console.log(`********** rendering: ${this.validateResult.email.helpMsg}`);
 		return (
 			<div id="requestInvite" className="pd1-tb">
 				<Button bsStyle="success" onClick={this.handleShow}>Send an invite</Button>
@@ -227,17 +228,17 @@ class RequestInvitationModal extends Component {
 									<p>Broccoli & Co. when we launch.</p>
 								</Alert>
 							}
-					</form>
-				</Modal.Body>
-				<Modal.Footer>
-				{ !this.state.done &&
-					<Button bsStyle="success" onClick={this.handleClick} disabled={this.state.disabled} block>{this.state.buttonMsg}</Button>
-				}
-				{ this.state.done &&
-					<Button bsStyle="success" onClick={this.handleClose} block>OK</Button>
-				}
-					<HelpBlock bsClass="help-msg">{this.errorMsg}</HelpBlock>
-				</Modal.Footer>
+						</form>
+					</Modal.Body>
+					<Modal.Footer>
+						{ !this.state.done &&
+							<Button bsStyle="success" onClick={this.handleClick} disabled={this.state.disabled} block>{this.state.buttonMsg}</Button>
+						}
+						{ this.state.done &&
+							<Button bsStyle="success" onClick={this.handleClose} block>OK</Button>
+						}
+						<HelpBlock bsClass="help-msg">{this.errorMsg}</HelpBlock>
+					</Modal.Footer>
 				</Modal>
 			</div>
 		);
