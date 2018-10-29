@@ -2,8 +2,8 @@
 `git clone https://github.com/evacao1225/broccoli_invitation.git`
 
 ## Step 2: install dependencies
-`cd broccoli_invitation`
-`npm install`
+- `cd broccoli_invitation`
+- `npm install`
 
 ## Step 3: run test cases
 `npm run test`
