@@ -1,7 +1,18 @@
 .main-welcome {
-	padding: 0 0 10px;
+	padding: 0 0 1rem;
 }
 
 .main {
-	margin: 20px 0;
+	margin: auto;
+	padding: 1rem 0;
+	height: 15rem;
+}
+
+.gray {
+	color: #eee;
+}
+
+.pd1-tb {
+	padding-top: 1rem;
+	padding-bottom: 1rem;
 }

@@ -12,7 +12,7 @@ class Main extends Component {
 					<h1>A better way</h1>
 					<h1>to enjoy every day.</h1>
 				</div>
-				<p><small>Be the first to know when we launch</small></p>
+				<p><small clssName="gray">Be the first to know when we launch</small></p>
 				<RequestInvitationModal />
 			</div>
 		);

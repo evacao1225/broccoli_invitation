@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
-import { Modal, Button, FormGroup, FormControl, HelpBlock } from 'react-bootstrap';
+import { Modal, Button, HelpBlock, Alert } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import '../styles/requestInvitation.css';
+import Input from '../common/Input.js';
 import Client from '../util/client';
 
 const RESULT = {success: "success", warning: "warning", error: "error", null: null};
@@ -12,6 +15,7 @@ class RequestInvitationModal extends Component {
 		this.handleShow = this.handleShow.bind(this);
 		this.handleClose = this.handleClose.bind(this);
 		this.getNameValidationState = this.getNameValidationState.bind(this);
+		this.getEmailValidationState = this.getEmailValidationState.bind(this);
 		this.getConfirmEmailValidationState = this.getConfirmEmailValidationState.bind(this);
 		this.handleClick = this.handleClick.bind(this);
 		this.handleNameChange = this.handleNameChange.bind(this);
@@ -25,7 +29,10 @@ class RequestInvitationModal extends Component {
 			email: '',
 			emailConfirmed: '',
 			buttonMsg: 'Send',
-			disabled: false
+			disabled: false,
+			name: '',
+			email: '',
+			emailConfirmed: ''
 		};
 
 		this.validateResult = {
@@ -36,12 +43,6 @@ class RequestInvitationModal extends Component {
 
 		// to store api error
 		this.errorMsg = '';
-		/*this.helpMsg4Name = '';
-		this.helpMsg4Email = '';
-		this.helpMsg4EmailConfirmed = '';
-		this.nameValid = false;
-		this.emailValid = false;
-		this.emailConfirmedValid = false;*/
 		this.emailValidator = new RegExp(/^[a-zA-Z0-9.!#'$%&*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/);
 	}
 
@@ -117,23 +118,31 @@ class RequestInvitationModal extends Component {
 		}
 	}
 
-	handleNameChange(e) {
-		this.setState({ name: e.target.value || '' });
+	handleNameChange(name) {
+		// check if name is valid
+		this.getNameValidationState(name);
+		// update name in state
+		this.setState({name: name || ''});
 	}
 
-	handleEmailChange(e) {
-		this.setState({ email: e.target.value || '' });
+	handleEmailChange(email) {
+		// check if email is valid
+		this.getEmailValidationState(email);
+		this.getConfirmEmailValidationState(this.state.emailConfirmed, email);
+		this.setState({ email: email || '' });
 	}
 
-	handleConfirmEmailChange(e) {
-		this.setState({ emailConfirmed: e.target.value || '' });
+	handleConfirmEmailChange(emailConfirmed) {
+		// check if email confirmed is valid
+		this.getConfirmEmailValidationState(emailConfirmed);
+		this.setState({ emailConfirmed: emailConfirmed || '' });
 	}
 
 	/*
 	check if name is at least three characters long
 	*/
-	getNameValidationState() {
-		const nameLength = this.state.name.length;
+	getNameValidationState(value) {
+		const nameLength = value.length;
 		let result = (nameLength >= 3) ? RESULT.success :
 			((nameLength <= 0) ? RESULT.null : RESULT.error);
 		this.validateResult.name.valid = result === RESULT.success;
@@ -145,8 +154,7 @@ class RequestInvitationModal extends Component {
 		return result;
 	}
 
-	getEmailValidationState() {
-		const email = this.state.email;
+	getEmailValidationState(email=this.state.email) {
 		let result = this.emailValidator.test(email) ? RESULT.success :
 			(email === '' ? RESULT.null : RESULT.error);
 		this.validateResult.email.valid = result === RESULT.success;
@@ -161,9 +169,7 @@ class RequestInvitationModal extends Component {
 	/*
 	check if email is validation email format
 	*/
-	getConfirmEmailValidationState() {
-		const email = this.state.email;
-		const emailConfirmed = this.state.emailConfirmed;
+	getConfirmEmailValidationState(emailConfirmed=this.state.emailConfirmed, email=this.state.email) {
 		let result = email === emailConfirmed ? (email === '' ? RESULT.null : RESULT.success) : RESULT.error;
 		this.validateResult.emailConfirmed.valid = result === RESULT.success;
 		if(result === RESULT.error) {
@@ -175,69 +181,51 @@ class RequestInvitationModal extends Component {
 	}
 
 	render() {
-		console.log(`********** rendering: ${this.validateResult.name.helpMsg}`);
+		console.log(`********** rendering: ${this.validateResult.email.helpMsg}`);
 		return (
-			<div id="requestInvite">
+			<div id="requestInvite" className="pd1-tb">
 				<Button bsStyle="success" onClick={this.handleShow}>Send an invite</Button>
 				<Modal show={this.state.show} onHide={this.handleClose}>
 					<Modal.Header closeButton>
-						<Modal.Title>{!this.state.done ? "Request an Invitation" : "All done!"}</Modal.Title>
+						<Modal.Title>
+							{!this.state.done ? "Request an Invitation" : "All done!"}
+						</Modal.Title>
 					</Modal.Header>
 					<Modal.Body>
 						<form>
 							{!this.state.done &&
-								<FormGroup
-									controlId="nameOfRequestInvite"
-									validationState={this.getNameValidationState()}
-								>
-									<FormControl
-										type="text"
-										value={this.state.name}
-										placeholder="Enter your name"
-										onChange={this.handleNameChange}
-										required
-									/>
-									<FormControl.Feedback />
-									<HelpBlock bsClass="help-msg">{this.validateResult.name.helpMsg}</HelpBlock>
-								</FormGroup>
+								<Input chartId="nameOfRequestInvite"
+									getValidationState={this.getNameValidationState}
+									type="text"
+									placeholder="Full name"
+									helpMsg={this.validateResult.name.helpMsg}
+									storeChange={this.handleNameChange}
+								/>
 							}
 							{!this.state.done &&
-								<FormGroup
-									controlId="emailOfRequestInvite"
-									validationState={this.getEmailValidationState()}
-								>
-									<FormControl
-										type="email"
-										value={this.state.email}
-										placeholder="Email"
-										onChange={this.handleEmailChange}
-										required
-									/>
-									<FormControl.Feedback />
-									<HelpBlock bsClass="help-msg">{this.validateResult.email.helpMsg}</HelpBlock>
-								</FormGroup>
+								<Input chartId="emailOfRequestInvite"
+									getValidationState={this.getEmailValidationState}
+									type="email"
+									placeholder="Email"
+									helpMsg={this.validateResult.email.helpMsg}
+									storeChange={this.handleEmailChange}
+								/>
 							}
 							{!this.state.done &&
-								<FormGroup
-									controlId="confirmEmailOfRequestInvite"
-									validationState={this.getConfirmEmailValidationState()}
-								>
-									<FormControl
-										type="email"
-										value={this.state.emailConfirmed}
-										placeholder="Confirm email"
-										onChange={this.handleConfirmEmailChange}
-										required
-									/>
-									<FormControl.Feedback />
-									<HelpBlock bsClass="help-msg">{this.validateResult.emailConfirmed.helpMsg}</HelpBlock>
-								</FormGroup>
+								<Input chartId="confirmEmailOfRequestInvite"
+									getValidationState={this.getConfirmEmailValidationState}
+									type="email"
+									placeholder="Email"
+									helpMsg={this.validateResult.emailConfirmed.helpMsg}
+									storeChange={this.handleConfirmEmailChange}
+								/>
 							}
 							{ this.state.done &&
-								<div>
+								<Alert bsStyle="info" bsClass="center">
+									<h4>Congratulations!</h4>
 									<p>You will be one of the first to experience</p>
 									<p>Broccoli & Co. when we launch.</p>
-								</div>
+								</Alert>
 							}
 					</form>
 				</Modal.Body>

@@ -1,5 +1,18 @@
 .page-footer {
-	padding-top: 9px;
-	margin: 20px 0 10px;
+	padding-top: 0.9rem;
+	padding-bottom: 0.9rem;
 	border-top: 1px solid #eee;
+}
+
+.gray {
+	color: #495057;
+}
+
+.glow {
+	-webkit-transition: opacity .15s ease-in;
+	transition: opacity .15s ease-in;
+}
+
+.pd2-t {
+	padding-top: 1rem;
 }
