@@ -11,7 +11,7 @@ class Footer extends Component {
 				<Row>
 					<Col md={5}>
 						<div>
-							<p>Made with <FontAwesomeIcon icon={faHeart} color="red"/> in Melbourne</p>
+							<p>Made with <FontAwesomeIcon icon={faHeart} color="red" className="glow"/> in Melbourne</p>
 						</div>
 					</Col>
 					<Col md={2}>
